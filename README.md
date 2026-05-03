@@ -45,16 +45,6 @@ The SQLite database and seed data are created **automatically** on first run.
 
 ---
 
-## 👤 Demo Accounts
-
-| Role     | Email                  | Password     |
-|----------|------------------------|--------------|
-| Admin    | admin@jobportal.com    | admin123     |
-| Employer | hr@techcorp.com        | employer123  |
-| Employer | hr@datasol.com         | employer123  |
-| Seeker   | alice@email.com        | seeker123    |
-
----
 
 ## ✅ Features Implemented
 
