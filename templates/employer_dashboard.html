@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Employer Dashboard — JobPulse{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-3">
+    <div>
+      <div class="section-label">Employer Hub</div>
+      <div class="section-title">Welcome, {{ user.company or user.name }}</div>
+      <div class="divider-tick"></div>
+    </div>
+    <a href="{{ url_for('post_job') }}" class="btn-accent-jp">+ Post a New Job</a>
+  </div>
+
+  <!-- STATS -->
+  <div class="row g-3 mb-4">
+    {% set active_jobs = jobs|selectattr('is_active')|list %}
+    {% set inactive_jobs = jobs|rejectattr('is_active')|list %}
+    {% set total_apps = namespace(count=0) %}
+    {% for job in jobs %}{% set total_apps.count = total_apps.count + job.applications|length %}{% endfor %}
+    <div class="col-6 col-md-3"><div class="stat-box"><div class="stat-num">{{ jobs|length }}</div><div class="stat-label">Total Jobs</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-box"><div class="stat-num">{{ active_jobs|length }}</div><div class="stat-label">Active</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-box"><div class="stat-num">{{ inactive_jobs|length }}</div><div class="stat-label">Closed</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-box"><div class="stat-num">{{ total_apps.count }}</div><div class="stat-label">Applications</div></div></div>
+  </div>
+
+  <!-- JOB LISTINGS -->
+  {% if jobs %}
+  <div style="background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden">
+    <table class="table-jp">
+      <thead>
+        <tr>
+          <th>Job Title</th>
+          <th>Location</th>
+          <th>Type</th>
+          <th>Applications</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for job in jobs %}
+        {% set button_class = 'btn-reopen' if not job.is_active else 'btn-close' %}
+        <tr>
+          <td>
+            <a href="{{ url_for('job_detail', job_id=job.id) }}" class="job-title-link" style="font-size:0.9rem">{{ job.title }}</a>
+            <div style="font-size:0.75rem;color:var(--muted)">{{ job.created_at.strftime('%b %d, %Y') }}</div>
+          </td>
+          <td style="color:var(--muted);font-size:0.85rem">{{ job.location }}</td>
+          <td><span class="tag tag-gray">{{ job.job_type }}</span></td>
+          <td>
+            {% if job.applications|length > 0 %}
+            <a href="{{ url_for('view_applications', job_id=job.id) }}" style="font-weight:600;color:var(--accent2)">{{ job.applications|length }} applicant{{ 's' if job.applications|length != 1 }}</a>
+            {% else %}
+            <span style="color:var(--muted)">0 applicants</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="status-badge status-{{ 'active' if job.is_active else 'inactive' }}">
+              {{ '🟢 Active' if job.is_active else '⚫ Closed' }}
+            </span>
+          </td>
+          <td>
+            <div class="d-flex gap-2">
+              <a href="{{ url_for('edit_job', job_id=job.id) }}" class="btn-outline-jp" style="padding:0.25rem 0.65rem;font-size:0.75rem">Edit</a>
+              <button onclick="toggleJob({{ job.id }}, this)" class="btn-outline-jp {{ button_class }}" style="padding:0.25rem 0.65rem;font-size:0.75rem">
+                {{ 'Reopen' if not job.is_active else 'Close' }}
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:4rem;color:var(--muted);background:#fff;border:1.5px solid var(--border);border-radius:8px">
+    <div style="font-size:2.5rem">📋</div>
+    <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-top:1rem">No jobs posted yet</div>
+    <p>Start attracting great candidates by posting your first job!</p>
+    <a href="{{ url_for('post_job') }}" class="btn-accent-jp" style="margin-top:1rem;display:inline-block">Post a Job →</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+async function toggleJob(id, btn) {
+  const res = await fetch(`/jobs/${id}/toggle`, { method: 'POST' });
+  const data = await res.json();
+  location.reload();
+}
+</script>
+{% endblock %}

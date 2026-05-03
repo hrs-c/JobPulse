@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Applications for {{ job.title }} — JobPulse{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-3">
+    <div>
+      <div class="section-label">{{ job.applications|length }} Applicant{{ 's' if job.applications|length != 1 }}</div>
+      <div class="section-title">{{ job.title }}</div>
+      <div class="divider-tick"></div>
+    </div>
+    <a href="{{ url_for('employer_dashboard') }}" class="btn-outline-jp">← Dashboard</a>
+  </div>
+
+  {% if applications %}
+  <div class="d-flex flex-column gap-3">
+    {% for app in applications %}
+    <div class="job-card">
+      <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem">{{ app.applicant.name }}</div>
+          <div style="color:var(--muted);font-size:0.82rem">{{ app.applicant.email }} · Applied {{ app.applied_at.strftime('%B %d, %Y') }}</div>
+        </div>
+        <span class="status-badge status-{{ app.status }}">
+          {% if app.status == 'pending' %}⏳{% elif app.status == 'reviewed' %}👀{% elif app.status == 'accepted' %}✅{% else %}❌{% endif %}
+          {{ app.status.title() }}
+        </span>
+      </div>
+
+      {% if app.cover_letter %}
+      <div style="background:var(--paper);border-radius:4px;padding:1rem;margin-top:1rem;font-size:0.88rem;line-height:1.7;border-left:3px solid var(--border);white-space:pre-line">{{ app.cover_letter }}</div>
+      {% else %}
+      <div style="color:var(--muted);font-size:0.85rem;margin-top:0.75rem;font-style:italic">No cover letter provided.</div>
+      {% endif %}
+
+      <!-- STATUS UPDATE -->
+      <form method="POST" action="{{ url_for('update_status', app_id=app.id) }}" class="d-flex align-items-center gap-2 mt-3 flex-wrap">
+        <select name="status" class="form-control-jp" style="width:auto;min-width:140px">
+          {% for s in ['pending','reviewed','accepted','rejected'] %}
+            <option value="{{ s }}" {% if app.status == s %}selected{% endif %}>{{ s.title() }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn-primary-jp" style="padding:0.4rem 1rem;font-size:0.82rem">Update Status</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:4rem;color:var(--muted);background:#fff;border:1.5px solid var(--border);border-radius:8px">
+    <div style="font-size:2.5rem">📭</div>
+    <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-top:1rem">No applications yet</div>
+    <p>Share your job listing to attract candidates.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

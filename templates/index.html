@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}JobPulse — Find Your Next Role{% endblock %}
+{% block extra_css %}
+<style>
+  .hero {
+    background: var(--ink);
+    padding: 5rem 0 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 40px,
+      rgba(255,255,255,0.015) 40px,
+      rgba(255,255,255,0.015) 80px
+    );
+  }
+  .hero-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+  }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p {
+    color: rgba(255,255,255,0.6);
+    font-size: 1.05rem;
+    max-width: 480px;
+    margin-top: 1rem;
+  }
+  .hero-search {
+    background: #fff;
+    border-radius: 6px;
+    padding: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    max-width: 560px;
+    margin-top: 2.5rem;
+    box-shadow: 6px 6px 0 var(--accent);
+  }
+  .hero-search input {
+    border: none;
+    outline: none;
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+  .hero-search button {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 0.55rem 1.4rem;
+    border-radius: 4px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: background 0.15s;
+  }
+  .hero-search button:hover { background: var(--accent); }
+  .hero-tags { margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .hero-tag {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: color 0.15s;
+    border-bottom: 1px dotted rgba(255,255,255,0.25);
+    padding-bottom: 1px;
+  }
+  .hero-tag:hover { color: #fff; }
+
+  .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
+  .cat-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--ink);
+    transition: all 0.2s;
+  }
+  .cat-card:hover {
+    border-color: var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+    transform: translate(-1.5px, -1.5px);
+    color: var(--ink);
+  }
+  .cat-card .cat-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  .cat-card .cat-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+  .cat-card .cat-count {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.15rem;
+  }
+
+  .jobs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; }
+</style>
+{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">🚀 {{ total_jobs }}+ Open Positions</div>
+    <h1>Find Work That<br/><em>Moves</em> You</h1>
+    <p>Discover opportunities at companies that match your ambitions. No noise, just the right jobs.</p>
+    <form action="{{ url_for('jobs') }}" method="GET">
+      <div class="hero-search">
+        <input name="q" type="text" placeholder="Search job title, skill, company…"/>
+        <button type="submit">Search <i class="bi bi-arrow-right"></i></button>
+      </div>
+    </form>
+    <div class="hero-tags">
+      <span style="color:rgba(255,255,255,0.35);font-size:0.78rem">Popular:</span>
+      {% for cat, _ in categories[:5] %}
+        <a href="{{ url_for('jobs', category=cat) }}" class="hero-tag">{{ cat }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="container py-4">
+  <div class="row g-3">
+    <div class="col-6 col-md-3">
+      <div class="stat-box">
+        <div class="stat-num">{{ total_jobs }}+</div>
+        <div class="stat-label">Live Jobs</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-box">
+        <div class="stat-num">{{ total_companies }}+</div>
+        <div class="stat-label">Companies</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-box">
+        <div class="stat-num">{{ total_seekers }}+</div>
+        <div class="stat-label">Candidates</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-box">
+        <div class="stat-num">{{ categories|length }}</div>
+        <div class="stat-label">Categories</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+{% if categories %}
+<section class="container py-4">
+  <div class="section-label">Explore</div>
+  <div class="section-title">Browse by Category</div>
+  <div class="divider-tick"></div>
+  {% set icons = {'Technology':'💻','Design':'🎨','Data Science':'📊','Management':'🗂','Marketing':'📣','Finance':'💰','Other':'🔍'} %}
+  <div class="category-grid">
+    {% for cat, count in categories %}
+    <a href="{{ url_for('jobs', category=cat) }}" class="cat-card">
+      <span class="cat-icon">{{ icons.get(cat, '🔍') }}</span>
+      <div class="cat-name">{{ cat }}</div>
+      <div class="cat-count">{{ count }} job{{ 's' if count != 1 }}</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- RECENT JOBS -->
+<section class="container py-4">
+  <div class="d-flex align-items-start justify-content-between mb-1">
+    <div>
+      <div class="section-label">Latest Openings</div>
+      <div class="section-title">Hot Off the Press</div>
+      <div class="divider-tick"></div>
+    </div>
+    <a href="{{ url_for('jobs') }}" class="btn-outline-jp mt-3">View All →</a>
+  </div>
+  <div class="jobs-grid">
+    {% for job in jobs %}
+    <div class="job-card">
+      <div class="d-flex align-items-start gap-3 mb-3">
+        <div class="company-logo">{{ job.employer.company[0] if job.employer.company else 'C' }}</div>
+        <div>
+          <a href="{{ url_for('job_detail', job_id=job.id) }}" class="job-title-link">{{ job.title }}</a>
+          <div style="color:var(--muted);font-size:0.82rem;margin-top:2px">{{ job.employer.company or job.employer.name }}</div>
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <span class="tag tag-blue">{{ job.category }}</span>
+        <span class="tag tag-gray">{{ job.job_type }}</span>
+        <span class="tag tag-green">{{ job.location }}</span>
+      </div>
+      <div class="d-flex align-items-center justify-content-between">
+        <span style="font-weight:600;font-size:0.88rem;color:var(--ink)">{{ job.salary or 'Salary TBD' }}</span>
+        <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn-primary-jp" style="padding:0.35rem 0.9rem;font-size:0.8rem">Apply →</a>
+      </div>
+    </div>
+    {% else %}
+    <div class="col-12"><p class="text-muted">No jobs yet. Check back soon!</p></div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+{% if not session.get('user_id') %}
+<section class="container py-4">
+  <div style="background:var(--accent);border-radius:8px;padding:3rem 2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem;">
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#fff;line-height:1.2">Ready to Hire Great People?</div>
+      <p style="color:rgba(255,255,255,0.8);margin-top:0.5rem">Post a job in minutes. Reach thousands of qualified candidates.</p>
+    </div>
+    <a href="{{ url_for('register') }}" class="btn-primary-jp" style="border-color:#fff;background:#fff;color:var(--accent);white-space:nowrap">Post a Job Free →</a>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

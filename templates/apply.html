@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Apply — {{ job.title }}{% endblock %}
+{% block content %}
+<div style="min-height:70vh;display:flex;align-items:center;justify-content:center;padding:3rem 1rem">
+  <div style="width:100%;max-width:560px">
+    <div class="section-label">Applying For</div>
+    <h1 style="font-size:1.8rem;font-weight:800">{{ job.title }}</h1>
+    <div style="color:var(--muted);margin-bottom:2rem">{{ job.employer.company or job.employer.name }} · {{ job.location }}</div>
+
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:2rem;box-shadow:6px 6px 0 var(--ink)">
+      <form method="POST">
+        <div class="mb-4">
+          <label class="form-label-jp">Cover Letter <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <textarea class="form-control-jp" name="cover_letter" rows="8"
+            placeholder="Tell the employer why you're a great fit for this role…" style="resize:vertical"></textarea>
+        </div>
+        <div style="display:flex;gap:0.75rem">
+          <button type="submit" class="btn-accent-jp">Submit Application →</button>
+          <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn-outline-jp">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

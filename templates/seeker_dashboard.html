@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}My Applications — JobPulse{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-3">
+      <div style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:1.5rem;position:sticky;top:80px">
+        <div style="text-align:center;margin-bottom:1.25rem">
+          <div style="width:56px;height:56px;background:var(--tag-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem;font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--accent2)">{{ user.name[0] }}</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700">{{ user.name }}</div>
+          <div style="font-size:0.78rem;color:var(--muted)">{{ user.email }}</div>
+          <span class="tag tag-blue" style="margin-top:0.5rem">Job Seeker</span>
+        </div>
+        <hr style="border-color:var(--border)"/>
+        <div style="display:flex;flex-direction:column;gap:0.5rem">
+          <a href="{{ url_for('jobs') }}" class="btn-outline-jp" style="text-align:center">Browse Jobs</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-9">
+      <div class="section-label">My Activity</div>
+      <div class="section-title">Job Applications</div>
+      <div class="divider-tick"></div>
+
+      <!-- STATS ROW -->
+      <div class="row g-3 mb-4">
+        {% set total = applications|length %}
+        {% set pending = applications|selectattr('status','equalto','pending')|list|length %}
+        {% set accepted = applications|selectattr('status','equalto','accepted')|list|length %}
+        <div class="col-4"><div class="stat-box"><div class="stat-num">{{ total }}</div><div class="stat-label">Applied</div></div></div>
+        <div class="col-4"><div class="stat-box"><div class="stat-num">{{ pending }}</div><div class="stat-label">Pending</div></div></div>
+        <div class="col-4"><div class="stat-box"><div class="stat-num">{{ accepted }}</div><div class="stat-label">Accepted</div></div></div>
+      </div>
+
+      {% if applications %}
+      <div style="background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden">
+        <table class="table-jp">
+          <thead>
+            <tr>
+              <th>Job Title</th>
+              <th>Company</th>
+              <th>Applied On</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for app in applications %}
+            <tr>
+              <td><strong>{{ app.job.title }}</strong></td>
+              <td style="color:var(--muted)">{{ app.job.employer.company or app.job.employer.name }}</td>
+              <td style="color:var(--muted)">{{ app.applied_at.strftime('%b %d, %Y') }}</td>
+              <td>
+                <span class="status-badge status-{{ app.status }}">
+                  {% if app.status == 'pending' %}⏳{% elif app.status == 'reviewed' %}👀{% elif app.status == 'accepted' %}✅{% else %}❌{% endif %}
+                  {{ app.status.title() }}
+                </span>
+              </td>
+              <td><a href="{{ url_for('job_detail', job_id=app.job_id) }}" class="btn-outline-jp" style="padding:0.25rem 0.75rem;font-size:0.78rem">View</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:4rem;color:var(--muted);background:#fff;border:1.5px solid var(--border);border-radius:8px">
+        <div style="font-size:2.5rem">📭</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-top:1rem">No applications yet</div>
+        <p>Start exploring open positions and apply today!</p>
+        <a href="{{ url_for('jobs') }}" class="btn-accent-jp" style="margin-top:1rem;display:inline-block">Browse Jobs →</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

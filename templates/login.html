@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Login — JobPulse{% endblock %}
+{% block content %}
+<div style="min-height:70vh;display:flex;align-items:center;justify-content:center;padding:3rem 1rem">
+  <div style="width:100%;max-width:420px">
+    <div style="text-align:center;margin-bottom:2rem">
+      <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800">Job<span style="color:var(--accent)">Pulse</span></div>
+      <div class="section-label" style="margin-top:0.5rem;display:block">Welcome Back</div>
+      <h2 style="font-size:1.5rem;font-weight:800">Sign in to your account</h2>
+    </div>
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:2rem;box-shadow:6px 6px 0 var(--ink)">
+      <form method="POST">
+        <div class="mb-3">
+          <label class="form-label-jp">Email Address</label>
+          <input class="form-control-jp" type="email" name="email" required placeholder="you@email.com"/>
+        </div>
+        <div class="mb-4">
+          <label class="form-label-jp">Password</label>
+          <input class="form-control-jp" type="password" name="password" required placeholder="••••••••"/>
+        </div>
+        <button type="submit" class="btn-primary-jp" style="width:100%;text-align:center">Sign In</button>
+      </form>
+      <hr style="border-color:var(--border);margin:1.5rem 0"/>
+      <p style="text-align:center;font-size:0.88rem;color:var(--muted)">
+        Don't have an account? <a href="{{ url_for('register') }}" style="color:var(--accent);font-weight:600">Register here</a>
+      </p>
+      <div style="background:var(--paper);border-radius:4px;padding:1rem;margin-top:1rem;font-size:0.78rem;color:var(--muted)">
+        <strong style="color:var(--ink)">Demo Accounts:</strong><br/>
+        Admin: admin@jobportal.com / admin123<br/>
+        Employer: hr@techcorp.com / employer123<br/>
+        Seeker: alice@email.com / seeker123
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

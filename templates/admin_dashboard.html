@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — JobPulse{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="section-label">Control Panel</div>
+  <div class="section-title">Admin Dashboard</div>
+  <div class="divider-tick"></div>
+
+  <!-- STATS -->
+  <div class="row g-3 mb-5">
+    <div class="col-6 col-md-3"><div class="stat-box"><div class="stat-num">{{ stats.total_users }}</div><div class="stat-label">Total Users</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-box"><div class="stat-num">{{ stats.total_jobs }}</div><div class="stat-label">Total Jobs</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-box"><div class="stat-num">{{ stats.active_jobs }}</div><div class="stat-label">Active Jobs</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-box"><div class="stat-num">{{ stats.total_applications }}</div><div class="stat-label">Applications</div></div></div>
+  </div>
+
+  <!-- USERS TABLE -->
+  <div class="mb-5">
+    <div class="section-label">User Management</div>
+    <h3 style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:1rem">All Users ({{ users|length }})</h3>
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden">
+      <table class="table-jp">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Company</th>
+            <th>Joined</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td style="color:var(--muted)">{{ user.id }}</td>
+            <td><strong>{{ user.name }}</strong></td>
+            <td style="color:var(--muted);font-size:0.82rem">{{ user.email }}</td>
+            <td>
+              {% if user.role == 'admin' %}
+                <span class="tag tag-red">Admin</span>
+              {% elif user.role == 'employer' %}
+                <span class="tag tag-blue">Employer</span>
+              {% else %}
+                <span class="tag tag-green">Seeker</span>
+              {% endif %}
+            </td>
+            <td style="color:var(--muted);font-size:0.85rem">{{ user.company or '—' }}</td>
+            <td style="color:var(--muted);font-size:0.82rem">{{ user.created_at.strftime('%b %d, %Y') }}</td>
+            <td>
+              {% if user.role != 'admin' %}
+              <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}"
+                onsubmit="return confirm('Delete user {{ user.name }}?')">
+                <button type="submit" style="background:none;border:none;color:var(--accent);font-size:0.82rem;cursor:pointer;font-weight:600;padding:0">Delete</button>
+              </form>
+              {% else %}
+              <span style="color:var(--muted);font-size:0.82rem">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- JOBS TABLE -->
+  <div>
+    <div class="section-label">Job Management</div>
+    <h3 style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:1rem">All Jobs ({{ jobs|length }})</h3>
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:8px;overflow:hidden">
+      <table class="table-jp">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Company</th>
+            <th>Category</th>
+            <th>Location</th>
+            <th>Apps</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for job in jobs %}
+          <tr>
+            <td>
+              <a href="{{ url_for('job_detail', job_id=job.id) }}" class="job-title-link" style="font-size:0.88rem">{{ job.title }}</a>
+            </td>
+            <td style="color:var(--muted);font-size:0.82rem">{{ job.employer.company or job.employer.name }}</td>
+            <td><span class="tag tag-gray" style="font-size:0.7rem">{{ job.category }}</span></td>
+            <td style="color:var(--muted);font-size:0.82rem">{{ job.location }}</td>
+            <td style="font-weight:600">{{ job.applications|length }}</td>
+            <td><span class="status-badge status-{{ 'active' if job.is_active else 'inactive' }}">{{ 'Active' if job.is_active else 'Closed' }}</span></td>
+            <td>
+              <form method="POST" action="{{ url_for('delete_job', job_id=job.id) }}"
+                onsubmit="return confirm('Delete this job?')">
+                <button type="submit" style="background:none;border:none;color:var(--accent);font-size:0.82rem;cursor:pointer;font-weight:600;padding:0">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

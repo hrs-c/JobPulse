@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Browse Jobs — JobPulse{% endblock %}
+{% block extra_css %}
+<style>
+  .jobs-page-header {
+    background: var(--ink);
+    padding: 2.5rem 0;
+    border-bottom: 3px solid var(--accent);
+  }
+  .jobs-page-header h1 { color: #fff; font-size: 2rem; }
+  .search-bar-row {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+  .search-bar-row input, .search-bar-row select {
+    border: none;
+    outline: none;
+    padding: 0.5rem 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: var(--ink);
+    background: transparent;
+    flex: 1;
+    min-width: 140px;
+  }
+  .search-bar-row select { cursor: pointer; }
+  .search-bar-row button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 0.55rem 1.4rem;
+    border-radius: 4px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.88rem;
+  }
+  .job-count-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+  .job-count-bar strong { color: var(--ink); }
+  .type-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .type-pill {
+    padding: 0.3rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    background: #fff;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .type-pill:hover, .type-pill.active {
+    border-color: var(--ink);
+    color: var(--ink);
+    background: var(--ink);
+    color: #fff;
+  }
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="jobs-page-header">
+  <div class="container">
+    <div class="hero-eyebrow" style="color:var(--accent)">{{ jobs|length }} Result{{ 's' if jobs|length != 1 }}</div>
+    <h1>{% if query %}Results for "{{ query }}"{% else %}All Open Positions{% endif %}</h1>
+    <form action="{{ url_for('jobs') }}" method="GET">
+      <div class="search-bar-row">
+        <input name="q" type="text" placeholder="🔍  Job title or keyword…" value="{{ query }}"/>
+        <select name="location">
+          <option value="">📍 All Locations</option>
+          {% for (loc,) in locations %}
+            <option value="{{ loc }}" {% if loc == sel_location %}selected{% endif %}>{{ loc }}</option>
+          {% endfor %}
+        </select>
+        <select name="category">
+          <option value="">🗂 All Categories</option>
+          {% for (cat,) in categories %}
+            <option value="{{ cat }}" {% if cat == sel_category %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+        <select name="type">
+          <option value="">⏱ Job Type</option>
+          <option value="Full-time" {% if sel_type=='Full-time' %}selected{% endif %}>Full-time</option>
+          <option value="Part-time" {% if sel_type=='Part-time' %}selected{% endif %}>Part-time</option>
+          <option value="Remote" {% if sel_type=='Remote' %}selected{% endif %}>Remote</option>
+        </select>
+        <button type="submit">Search</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="job-count-bar">
+    <span>Showing <strong>{{ jobs|length }}</strong> jobs</span>
+    <div class="type-pills">
+      <a href="{{ url_for('jobs', q=query, location=sel_location, category=sel_category) }}" class="type-pill {% if not sel_type %}active{% endif %}">All</a>
+      <a href="{{ url_for('jobs', q=query, location=sel_location, category=sel_category, type='Full-time') }}" class="type-pill {% if sel_type=='Full-time' %}active{% endif %}">Full-time</a>
+      <a href="{{ url_for('jobs', q=query, location=sel_location, category=sel_category, type='Part-time') }}" class="type-pill {% if sel_type=='Part-time' %}active{% endif %}">Part-time</a>
+      <a href="{{ url_for('jobs', q=query, location=sel_location, category=sel_category, type='Remote') }}" class="type-pill {% if sel_type=='Remote' %}active{% endif %}">Remote</a>
+    </div>
+  </div>
+
+  {% if jobs %}
+  <div class="d-flex flex-column gap-3">
+    {% for job in jobs %}
+    <div class="job-card" style="display:flex;align-items:center;flex-wrap:wrap;gap:1.25rem">
+      <div class="company-logo flex-shrink-0">{{ job.employer.company[0] if job.employer.company else 'C' }}</div>
+      <div style="flex:1;min-width:200px">
+        <a href="{{ url_for('job_detail', job_id=job.id) }}" class="job-title-link">{{ job.title }}</a>
+        <div style="color:var(--muted);font-size:0.82rem;margin-top:2px">
+          {{ job.employer.company or job.employer.name }} &nbsp;·&nbsp; Posted {{ job.created_at.strftime('%b %d') }}
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          <span class="tag tag-blue">{{ job.category }}</span>
+          <span class="tag tag-gray">{{ job.job_type }}</span>
+          <span class="tag tag-green"><i class="bi bi-geo-alt"></i> {{ job.location }}</span>
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-weight:700;font-size:0.92rem;margin-bottom:0.5rem">{{ job.salary or '—' }}</div>
+        <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn-primary-jp" style="padding:0.35rem 1rem;font-size:0.8rem">View →</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:4rem;color:var(--muted)">
+    <div style="font-size:3rem">🔍</div>
+    <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;margin-top:1rem">No jobs found</div>
+    <p style="margin-top:0.5rem">Try adjusting your filters or <a href="{{ url_for('jobs') }}">clear all</a></p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

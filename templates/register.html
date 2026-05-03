@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Register — JobPulse{% endblock %}
+{% block extra_css %}
+<style>
+  .role-card {
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .role-card:hover { border-color: var(--ink); }
+  input[name="role"]:checked + label .role-card {
+    border-color: var(--accent);
+    background: #fff1ee;
+  }
+  input[name="role"] { display: none; }
+  #company-field { display: none; }
+</style>
+{% endblock %}
+{% block content %}
+<div style="min-height:70vh;display:flex;align-items:center;justify-content:center;padding:3rem 1rem">
+  <div style="width:100%;max-width:480px">
+    <div style="text-align:center;margin-bottom:2rem">
+      <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800">Job<span style="color:var(--accent)">Pulse</span></div>
+      <div class="section-label" style="margin-top:0.5rem;display:block">Get Started</div>
+      <h2 style="font-size:1.5rem;font-weight:800">Create your account</h2>
+    </div>
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:2rem;box-shadow:6px 6px 0 var(--ink)">
+      <form method="POST" id="reg-form">
+        <!-- ROLE SELECT -->
+        <div class="mb-4">
+          <label class="form-label-jp">I am a…</label>
+          <div class="d-flex gap-3">
+            <div style="flex:1">
+              <input type="radio" name="role" id="role-seeker" value="seeker" checked/>
+              <label for="role-seeker" style="display:block;cursor:pointer">
+                <div class="role-card">
+                  <div style="font-size:1.5rem">🙋</div>
+                  <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;margin-top:0.3rem">Job Seeker</div>
+                  <div style="font-size:0.72rem;color:var(--muted)">Find & apply for jobs</div>
+                </div>
+              </label>
+            </div>
+            <div style="flex:1">
+              <input type="radio" name="role" id="role-employer" value="employer"/>
+              <label for="role-employer" style="display:block;cursor:pointer">
+                <div class="role-card">
+                  <div style="font-size:1.5rem">🏢</div>
+                  <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;margin-top:0.3rem">Employer</div>
+                  <div style="font-size:0.72rem;color:var(--muted)">Post jobs & hire</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label-jp">Full Name</label>
+          <input class="form-control-jp" type="text" name="name" required placeholder="Your full name"/>
+        </div>
+        <div class="mb-3" id="company-field">
+          <label class="form-label-jp">Company Name</label>
+          <input class="form-control-jp" type="text" name="company" placeholder="e.g. Acme Corp"/>
+        </div>
+        <div class="mb-3">
+          <label class="form-label-jp">Email Address</label>
+          <input class="form-control-jp" type="email" name="email" required placeholder="you@email.com"/>
+        </div>
+        <div class="mb-4">
+          <label class="form-label-jp">Password</label>
+          <input class="form-control-jp" type="password" name="password" required placeholder="Min. 6 characters"/>
+        </div>
+        <button type="submit" class="btn-accent-jp" style="width:100%;text-align:center">Create Account →</button>
+      </form>
+      <hr style="border-color:var(--border);margin:1.5rem 0"/>
+      <p style="text-align:center;font-size:0.88rem;color:var(--muted)">
+        Already have an account? <a href="{{ url_for('login') }}" style="color:var(--accent);font-weight:600">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  const companyField = document.getElementById('company-field');
+  document.querySelectorAll('input[name="role"]').forEach(el => {
+    el.addEventListener('change', () => {
+      companyField.style.display = el.value === 'employer' ? 'block' : 'none';
+    });
+  });
+</script>
+{% endblock %}
